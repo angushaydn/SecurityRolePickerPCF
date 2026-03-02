@@ -161,3 +161,7 @@ For publisher ownership in Dataverse:
 - `obj/` - intermediate build artifacts
 - `Solutions/` - solution packaging artifacts
 - `SecurityRolePicker.pcfproj` - MSBuild project for PCF packaging
+
+# Preview
+<img width="2278" height="1165" alt="image" src="https://github.com/user-attachments/assets/7d713612-9432-42ed-82c4-0e3357578f84" />
+
