@@ -122,23 +122,17 @@ Manifest (`ControlManifest.Input.xml`) includes:
 Note:
 - The manifest currently includes a required placeholder bound property `sampleProperty`. The control logic does not use this property directly.
 
-## Build and Local Development
+### Import Solution
 
-Prerequisites:
-- Node.js + npm
-- Power Platform CLI / PCF toolchain
+1. Download the solution file:
+   - **Unmanaged**: `Solutions/SecurityRolePickerPCF_1_0_0_1.zip`
+   
 
-Install:
-```bash
-npm install
-```
+2. Go to [Power Apps](https://make.powerapps.com)
 
-Key scripts:
-- `npm run build` -> production build
-- `npm run start` -> start local harness
-- `npm run start:watch` -> watch mode
-- `npm run lint` -> lint checks
-- `npm run rebuild` -> clean + build
+3. Navigate to **Solutions** > **Import solution**
+
+4. Select the downloaded `.zip` file and follow the import wizard
 
 ## Deploying To Dataverse
 
@@ -147,6 +141,7 @@ Typical flow:
 2. Add/update in a Dataverse solution.
 3. Push/import to target environment.
 4. Place on `team` or `systemuser` forms.
+5. (Recommended) Set on a brand new tab on form with "Expand first component to full tab" for the best view/management
 
 For publisher ownership in Dataverse:
 - Publisher is determined by the target solution/component in the environment, not just by CLI prefix arguments.
