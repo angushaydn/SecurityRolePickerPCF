@@ -217,6 +217,19 @@
   background: var(--colorBrandBackground2, #0f6cbd);
 }
 
+.role-row-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.role-business-unit {
+  color: var(--colorNeutralForeground3, #616161);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .matrix-table {
   width: 100%;
   min-width: 0;
@@ -289,3 +302,4 @@
   .bento{ grid-template-columns:1fr; }
   .span-2,.span-3{ grid-column:span 1; }
 }
+

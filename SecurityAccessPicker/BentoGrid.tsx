@@ -11,7 +11,8 @@ export interface BentoGridProps {
 
 interface OneColItem {
   id: string;
-  label: string;
+  roleName: string;
+  businessUnitName: string;
 }
 type MatrixColor = "#107C10" | "#2266E3" | "#A52A2A" | "#797775" | "#FFFFFF";
 interface MatrixItem {
@@ -29,6 +30,7 @@ interface MatrixItem {
 interface RoleRecord {
   roleid: string;
   name: string;
+  businessUnitName: string;
 }
 type DepthClass = "basic" | "local" | "deep" | "global";
 type SecurityPrincipalType = "team" | "systemuser";
@@ -153,7 +155,10 @@ const toRoleRecord = (value: unknown): RoleRecord | null => {
   const roleid = typeof value.roleid === "string" ? value.roleid : null;
   const name = typeof value.name === "string" ? value.name : null;
   if (!roleid || !name) return null;
-  return { roleid, name };
+  const buFromFormattedValue = getStringProperty(value, "_businessunitid_value@OData.Community.Display.V1.FormattedValue");
+  const buFromExpandedRecord = getStringProperty(value.businessunitid, "name");
+  const businessUnitName = buFromFormattedValue ?? buFromExpandedRecord ?? "";
+  return { roleid, name, businessUnitName };
 };
 
 const getPageEntityId = (windowRef: WindowWithXrm | null | undefined): string | null => {
@@ -402,9 +407,9 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ context }) => {
         context.webAPI.retrieveRecord(
           currentPrincipalType,
           currentPrincipalId,
-          `?$select=${principalConfig.displayNameColumn}&$expand=${principalConfig.roleRelationship}($select=roleid,name;$orderby=name asc)`
+          `?$select=${principalConfig.displayNameColumn}&$expand=${principalConfig.roleRelationship}($select=roleid,name,_businessunitid_value;$orderby=name asc)`
         ),
-        context.webAPI.retrieveMultipleRecords("role", "?$select=roleid,name&$orderby=name asc"),
+        context.webAPI.retrieveMultipleRecords("role", "?$select=roleid,name,_businessunitid_value&$orderby=name asc"),
       ]);
 
       const teamRoles = getArrayProperty(principal, principalConfig.roleRelationship)
@@ -415,8 +420,8 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ context }) => {
       const allRoleRecords = roleEntities.map(toRoleRecord).filter((record): record is RoleRecord => record !== null);
 
       setPrincipalName(principalLabel);
-      setAssignedRoles(teamRoles.map((r) => ({ roleid: r.roleid, name: r.name })));
-      setAllRoles(allRoleRecords.map((r) => ({ roleid: r.roleid, name: r.name })));
+      setAssignedRoles(teamRoles.map((r) => ({ roleid: r.roleid, name: r.name, businessUnitName: r.businessUnitName })));
+      setAllRoles(allRoleRecords.map((r) => ({ roleid: r.roleid, name: r.name, businessUnitName: r.businessUnitName })));
       await loadGrid(currentPrincipalType, currentPrincipalId);
       setSelectedLeftId(null);
       setSelectedRightId(null);
@@ -443,7 +448,7 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ context }) => {
       allRoles
         .filter((r) => !assignedSet.has(r.roleid))
         .filter((r) => (r.name ?? "").toLowerCase().includes(normalizedQuery))
-        .map((r) => ({ id: r.roleid, label: r.name ?? "(no name)" })),
+        .map((r) => ({ id: r.roleid, roleName: r.name ?? "(no name)", businessUnitName: r.businessUnitName ?? "" })),
     [allRoles, assignedSet, normalizedQuery]
   );
 
@@ -451,7 +456,7 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ context }) => {
     () =>
       assignedRoles
         .filter((r) => (r.name ?? "").toLowerCase().includes(normalizedQuery))
-        .map((r) => ({ id: r.roleid, label: r.name ?? "(no name)" })),
+        .map((r) => ({ id: r.roleid, roleName: r.name ?? "(no name)", businessUnitName: r.businessUnitName ?? "" })),
     [assignedRoles, normalizedQuery]
   );
 
@@ -491,7 +496,10 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ context }) => {
 
       setAssignedRoles((prev) => {
         if (prev.some((r) => r.roleid === selectedAvailable.id)) return prev;
-        const next = [...prev, { roleid: selectedAvailable.id, name: selectedAvailable.label }];
+        const next = [
+          ...prev,
+          { roleid: selectedAvailable.id, name: selectedAvailable.roleName, businessUnitName: selectedAvailable.businessUnitName },
+        ];
         next.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
         return next;
       });
@@ -573,7 +581,12 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ context }) => {
                         }}
                       >
                         <td>
-                          <span className="grid-body-text">{item.label}</span>
+                          <div className="role-row-content">
+                            <span className="grid-body-text">{item.roleName}</span>
+                            {item.businessUnitName ? (
+                              <span className="grid-body-text role-business-unit">{item.businessUnitName}</span>
+                            ) : null}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -623,7 +636,12 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ context }) => {
                         }}
                       >
                         <td>
-                          <span className="grid-body-text">{item.label}</span>
+                          <div className="role-row-content">
+                            <span className="grid-body-text">{item.roleName}</span>
+                            {item.businessUnitName ? (
+                              <span className="grid-body-text role-business-unit">{item.businessUnitName}</span>
+                            ) : null}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -672,3 +690,4 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ context }) => {
     </main>
   );
 };
+
